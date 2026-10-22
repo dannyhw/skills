@@ -1,0 +1,40 @@
+Don't shard yet. 40M rows is small for Postgres, and slow reads at that size almost always come from queries, indexes, or configuration. Sharding is for problems you'd see at billions of rows or at write-throughput limits.
+
+**Do this first, in order:**
+
+1. **Find the slow queries.**
+   - Enable `pg_stat_statements` and sort by `total_exec_time` and `mean_exec_time`.
+   - Pick the top 3–5 offenders. Don't tune anything that isn't on that list.
+
+2. **Run `EXPLAIN (ANALYZE, BUFFERS)` on each one.** Look for:
+   - Seq scans on a large table where you expected an index.
+   - Row estimates far from actual rows, which means stale stats. Run `ANALYZE`.
+   - Sorts or hashes spilling to disk. Consider raising `work_mem`.
+   - High `shared read` against `shared hit`, which means the data isn't staying in cache.
+
+3. **Fix the indexes.**
+   - Add composite indexes that match your `WHERE` and `ORDER BY` columns.
+   - Use partial indexes if queries filter on a common condition, such as `WHERE status = 'active'`.
+   - Use covering indexes (`INCLUDE`) to get index-only scans.
+   - Drop unused indexes. Check `pg_stat_user_indexes`.
+   - Build with `CREATE INDEX CONCURRENTLY` so you don't block writes.
+
+4. **Check for bloat and vacuum health.** Heavy updates or deletes can leave the table and its indexes bloated. Check autovacuum settings, and consider `pg_repack` if bloat is severe.
+
+5. **Check the configuration.**
+   - `shared_buffers` is typically about 25% of RAM.
+   - `effective_cache_size` is typically 50–75% of RAM.
+   - Set `random_page_cost` to about 1.1 on SSDs.
+   - Make sure the working set fits in memory. If it doesn't, more RAM is often the cheapest fix.
+
+**If that isn't enough, escalate in this order:**
+
+- **Read replicas.** These help if the load is read-heavy. Watch out for replication lag.
+- **Caching.** Put Redis or an application cache in front of hot, repeated reads.
+- **Materialized views or summary tables.** These suit expensive aggregates.
+- **Partitioning.** Native declarative partitioning, usually by time, helps when queries filter on the partition key or when you archive old data. It's much simpler than sharding, and it stays on one node.
+- **Archiving cold data.** If most reads touch only recent rows, move the old ones out.
+
+**Sharding comes last.** It makes cross-shard queries, joins, transactions, and migrations much harder. Consider it only when a single primary can't handle your write volume or data size even after the steps above.
+
+If you can share a slow query, its `EXPLAIN (ANALYZE, BUFFERS)` output, and the table schema with its indexes, I can tell you what's likely wrong. It would also help to know the read/write ratio and the instance size.

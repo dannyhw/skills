@@ -1,0 +1,64 @@
+# What is happening
+
+OOMKilled means the container used more memory than its limit. The Linux kernel then killed the main process (exit code 137). Kubernetes restarts the container, so you see repeated restarts. If it keeps happening, the pod ends up in `CrashLoopBackOff`.
+
+Only the memory limit matters here. The node may have plenty of free memory. The container is killed once it goes over its own `resources.limits.memory`.
+
+# Confirm it first
+
+```sh
+kubectl describe pod <pod> | grep -A5 "Last State"
+```
+
+Look for `Reason: OOMKilled` and `Exit Code: 137`.
+
+Then check real usage:
+
+```sh
+kubectl top pod <pod> --containers
+```
+
+For history, use your metrics tool (Prometheus or Grafana) and look at `container_memory_working_set_bytes` against the limit.
+
+# Why it happens
+
+There are three common causes:
+
+1. **The limit is too low.** The app simply needs more memory than you allowed.
+2. **A memory leak.** Usage climbs steadily until it hits the limit, then drops after the restart.
+3. **A runtime that ignores the limit.** For example, a JVM heap or Node.js heap sized above the container limit. Also, spikes at start-up or under load.
+
+# What to change
+
+**1. Raise the limit (quick fix).** Edit the deployment:
+
+```yaml
+resources:
+  requests:
+    memory: "512Mi"
+  limits:
+    memory: "1Gi"
+```
+
+Set the request close to normal usage. Set the limit with headroom above the peak, around 25–50% more.
+
+**2. Tune the runtime so it stays under the limit.**
+
+- Java: `-XX:MaxRAMPercentage=75.0` (rather than a fixed `-Xmx` that is too big).
+- Node.js: `--max-old-space-size=<MB>` set below the container limit.
+- Others: check the cache, pool and buffer sizes.
+
+**3. Fix the leak, if usage only ever climbs.** Raising the limit only delays the kill. Profile the app, and look for unbounded caches, queues or large payloads held in memory.
+
+**4. Check sidecars.** Each container has its own limit. The one that was killed may not be your main app.
+
+# Apply and watch
+
+```sh
+kubectl apply -f deployment.yaml
+kubectl get pod -w
+```
+
+Keep an eye on memory for a day or so. If restarts stop and usage is flat, the limit was the issue. If usage still climbs, you have a leak.
+
+If you share the `kubectl describe pod` output and the language of the app, I can give you specific numbers.

@@ -1,0 +1,22 @@
+I can't see your code, so this is the most likely cause. Your working directory has no project in it.
+
+**Why it happens**
+
+Your cache entries have a time-to-live (TTL) of about 10 minutes. When you update a price in the database, nothing tells Redis. The old value stays in the cache until the TTL runs out. Every reader gets that old value until then.
+
+**The fix**
+
+Choose one of these, in order of preference:
+
+1. **Invalidate on write.** When the price is updated, delete the cache key straight afterwards. The next read misses, loads the new price from the database and refills the cache. This is the usual fix.
+2. **Write through.** Update the database and then set the new value in Redis in the same code path. It is fast, but you must keep both writes in step.
+3. **Shorten the TTL.** This is simple, but it only reduces the problem. It also puts more load on the database.
+
+**Things to get right**
+
+- Delete the key after the database commit, not before. If you delete first, a reader can refill the cache with the old price before the commit lands.
+- Make sure every code path that changes prices does the invalidation. Bulk imports, admin tools and background jobs are often missed.
+- If you have read replicas, a refill may read from a lagging replica. Read from the primary for the refill, or delay the delete slightly.
+- Keep a TTL as a safety net, even with invalidation. A missed delete then fixes itself.
+
+If you point me at the repository, I can find the exact cache and update code and make the change.

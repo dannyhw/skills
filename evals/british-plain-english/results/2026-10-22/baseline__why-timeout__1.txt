@@ -1,0 +1,19 @@
+**Idempotent** means that making the same request several times leaves the system in the same state as making it once. The classic example is "set the status to shipped", which you can repeat safely. "Add $10 to the balance" is not idempotent.
+
+**Is your retry safe?** It's safe only if the endpoint is idempotent in the sense that matters for a retry, and a bare `POST` usually isn't. By default `POST /orders` creates a new order on every call.
+
+A timeout makes this worse. The client doesn't know whether the server never got the request or processed it and the response was lost. If it was processed and you retry, you can get a duplicate order.
+
+**What to check:**
+- **Idempotency key.** The endpoint is only truly safe to retry if it dedupes on a client-supplied key, such as an `Idempotency-Key` header. The script must generate that key **once per logical order** and send the **same key on every retry**. A new key per attempt defeats the protection.
+- **What the server does on a duplicate.** It should return the original result, not an error and not a second order.
+- **Key lifetime.** The server needs to remember keys longer than your total retry window.
+
+If the endpoint is only idempotent because the docs say so, with no key or natural dedupe such as a unique client order ID, I'd verify that before relying on it.
+
+**Retry hygiene:**
+- Use exponential backoff with jitter.
+- Cap the number of attempts.
+- Retry only on timeouts, connection errors and 5xx responses, not on 4xx.
+
+If you share the script or the API docs, I can check whether the key is generated and reused correctly.

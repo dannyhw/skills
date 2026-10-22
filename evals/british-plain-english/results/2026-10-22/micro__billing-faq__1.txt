@@ -1,0 +1,21 @@
+# What happens when your team cancels its subscription
+
+If you cancel your team's subscription, we want the change to be clear and free of surprises. Here is what to expect.
+
+## Your licence stays active
+
+Cancelling does not end your access straight away. Your team's licence stays active until the end of the current billing period. You can keep using every feature until then, and you won't be charged again.
+
+## Cancelled seats are removed
+
+When the billing period ends, all cancelled seats are removed. Team members will no longer be able to sign in or use the app under your team's plan.
+
+## Your data is kept for 30 days
+
+We keep your team's data for 30 days after your licence ends. During this time, you can export anything you need. If you change your mind, you can resubscribe and restore your data.
+
+After 30 days, your data is permanently deleted. We can't recover it after that point.
+
+## Need help?
+
+If you have any questions, contact our support team. We're happy to help.

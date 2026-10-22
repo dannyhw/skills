@@ -1,0 +1,11 @@
+## Some API requests failed on 3 March 2026
+
+Between 14:02 and 14:31 UTC on 3 March 2026, 12% of API requests failed with HTTP 502 errors (a "bad gateway" response, which means our servers could not answer the request).
+
+A deploy at 14:00 UTC removed the cache warmup step. This step fills the cache before the API takes traffic. Without it, the API could not answer some requests in time.
+
+We reverted the deploy at 14:27 UTC. Error rates fell to normal by 14:31 UTC, and the API has worked as expected since then.
+
+If your requests failed during this time, you can safely send them again. You do not need to take any other action.
+
+We are changing our deploy checks so that a missing warmup step stops a release before it reaches users. We are sorry for the disruption.

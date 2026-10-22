@@ -1,0 +1,14 @@
+[
+  {"id": "readme-intro", "kind": "doc", "prompt": "Write the introduction section (about 120 words) of the README for a CLI tool called sqlpipe that syncs Postgres tables to S3 as Parquet files and lets an organization standardize how its teams export data. Return only the text."},
+  {"id": "troubleshooting", "kind": "doc", "prompt": "Write a troubleshooting section for the CLI tool sqlpipe covering connection timeouts to Postgres and S3 permission errors. About 150 words. Return only the text."},
+  {"id": "settings-page", "kind": "doc", "prompt": "Write the help text for the Appearance settings page of a web app: users can pick a color theme, customize the accent color, and choose how the sidebar behaves when the window is narrow. About 120 words. Return only the text."},
+  {"id": "billing-faq", "kind": "doc", "prompt": "Write a short help article for a SaaS app explaining what happens when a team cancels its subscription: the license stays active until the end of the billing period, canceled seats are removed, and data is kept for 30 days. About 150 words. Return only the text."},
+  {"id": "maintenance-email", "kind": "doc", "prompt": "Write an email to customers about planned database maintenance on Saturday 14 November 2026 from 10pm to 2am UK time. Uploads will be paused; downloads keep working. About 120 words. Return only the email."},
+  {"id": "incident-report", "kind": "doc", "prompt": "Write a public status-page incident report: on 3 March 2026 between 14:02 and 14:31 UTC, 12% of API requests failed with HTTP 502 because a deploy at 14:00 removed the cache warmup step. The deploy was reverted at 14:27. About 120 words. Return only the text."},
+  {"id": "why-timeout", "kind": "reply", "prompt": "My deploy script retries a POST to /v2/orders on timeout. Is that safe? The endpoint is idempotent, whatever that means exactly. Explain briefly."},
+  {"id": "pick-db", "kind": "reply", "prompt": "We have 40 million rows in one Postgres table and reads are slow. Someone said sharding. What should I do first?"},
+  {"id": "cert-error", "kind": "reply", "prompt": "curl says 'SSL certificate problem: unable to get local issuer certificate' against our internal API. What is happening and how do I fix it?"},
+  {"id": "oom", "kind": "reply", "prompt": "A Kubernetes pod keeps restarting with status OOMKilled. Explain what is going on and what I change."},
+  {"id": "cache", "kind": "reply", "prompt": "Users see stale prices for up to 10 minutes after we update them. We use Redis in front of the database. Why, and what is the fix?"},
+  {"id": "license-q", "kind": "reply", "prompt": "Can I use an MIT licensed library in our closed-source product? What do I have to do?"}
+]

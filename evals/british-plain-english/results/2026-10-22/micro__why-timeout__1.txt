@@ -1,0 +1,16 @@
+**Idempotent** means that making the same request many times has the same effect as making it once. The server ends up in the same state. A second or third attempt does not add anything new.
+
+**Is your retry safe?** Yes, but only if the endpoint is truly idempotent for POST. This is the catch. POST is not idempotent by default in HTTP. It usually creates something new each time. So "the endpoint is idempotent" only holds if the API was built that way.
+
+**Why timeouts are risky:** A timeout does not tell you the request failed. The server may have created the order and the reply was lost. A blind retry could then create a second order.
+
+**What to check:**
+- **Idempotency key:** Does `/v2/orders` accept one, such as an `Idempotency-Key` header? The server uses it to spot repeats and return the original result.
+- **Same key on every retry:** Generate the key once per order. Do not make a new one for each attempt.
+- **Documented behaviour:** Confirm in the API docs that repeats with the same key do not create duplicates. Don't rely on the word "idempotent" alone.
+
+**If there is no key:** The retry is not safe. Before you retry, look up whether the order exists (for example, with a GET by a client-side reference). Or add a unique client reference that the server rejects as a duplicate.
+
+**Good practice:** Use a limited number of retries, with exponential backoff and some random delay.
+
+If you share the endpoint's docs or the script, I can check them for you.

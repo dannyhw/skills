@@ -1,0 +1,20 @@
+## Troubleshooting
+
+### Connection timeouts to Postgres
+
+If sqlpipe hangs and then reports `connection timed out`, work through these checks.
+
+1. **Check the host and port.** Make sure the connection string is correct. The default port is 5432.
+2. **Test the network.** Run `pg_isready -h <host> -p <port>`. If it fails, a firewall or security group may be blocking you.
+3. **Check the allow list.** Managed databases often accept only certain IP addresses. Add the address of the machine running sqlpipe.
+4. **Raise the timeout.** Use `--connect-timeout 30` for slow or distant servers.
+5. **Check SSL.** If the server requires SSL, add `sslmode=require` to the connection string.
+
+### S3 permission errors
+
+If you see `AccessDenied` or `403 Forbidden`, the cause is usually the credentials or the policy.
+
+1. **Confirm the identity.** Run `aws sts get-caller-identity` to see which account sqlpipe is using.
+2. **Check the policy.** The role needs `s3:GetObject`, `s3:PutObject` and `s3:ListBucket` on the bucket.
+3. **Check the region.** Set `AWS_REGION` to match the bucket.
+4. **Check bucket rules.** Look for restrictive bucket policies or encryption keys the role cannot use.

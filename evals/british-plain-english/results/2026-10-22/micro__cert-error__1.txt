@@ -1,0 +1,55 @@
+**What is happening**
+
+curl checks the server's certificate against a list of trusted certificate authorities (CAs). The error means curl could not link the server's certificate back to a CA it trusts.
+
+For an internal API, the usual causes are:
+
+1. **A private CA.** Your company signed the certificate with its own CA. Public trust lists don't include it.
+2. **A missing intermediate certificate.** The server sends only its own certificate, not the full chain.
+3. **A corporate proxy that inspects traffic.** It re-signs HTTPS with its own CA.
+4. **A curl build that uses its own CA bundle.** For example, one from Homebrew. It doesn't read the macOS Keychain.
+
+**How to find out which**
+
+```sh
+openssl s_client -connect api.internal.example:443 -showcerts </dev/null
+```
+
+Look at the chain. If you see only one certificate, the server is missing its intermediate. If the issuer is your company's name, it's a private CA.
+
+**How to fix it**
+
+1. Get the company root CA certificate in PEM format. Ask your IT or platform team, or look in your internal docs.
+2. Tell curl to use it:
+
+   ```sh
+   curl --cacert /path/to/company-ca.pem https://api.internal.example/
+   ```
+
+3. To make it permanent, set an environment variable in `~/.zshrc`:
+
+   ```sh
+   export CURL_CA_BUNDLE=/path/to/company-ca.pem
+   ```
+
+   Note that this replaces the default list for curl. If you also call public sites, make a combined file. Append your CA to the system bundle:
+
+   ```sh
+   cat $(curl-config --ca) /path/to/company-ca.pem > ~/combined-ca.pem
+   ```
+
+   If `curl-config --ca` prints nothing, use `/etc/ssl/cert.pem`.
+
+4. Alternatively, add the CA to the macOS Keychain and mark it as trusted. The system curl at `/usr/bin/curl` will then work. A Homebrew curl may not.
+
+**If the server is missing its intermediate**
+
+Ask the API owners to serve the full chain. That fixes it for every client, not just yours.
+
+**What not to do**
+
+Avoid `curl -k` or `--insecure` except as a quick test. It turns off verification, so anyone on the network could impersonate the API.
+
+Other tools have their own settings. Node uses `NODE_EXTRA_CA_CERTS`. Python's requests uses `REQUESTS_CA_BUNDLE`. Git uses `http.sslCAInfo`.
+
+If you paste the output of the `openssl` command, I can tell you which cause it is.

@@ -1,0 +1,7 @@
+Use the Appearance page to change how the app looks. Your choices apply straight away and are saved to your account, so they follow you to other devices.
+
+Theme: choose Light, Dark or System. System matches the setting on your device and changes when your device changes. If you work in bright rooms, Light is easier to read. Dark is easier on the eyes at night.
+
+Accent colour: this colour is used for buttons, links and selected items. Pick one of the preset colours, or enter your own hex code (a colour code such as #1A73E8). Choose a colour that stands out from the background, or some text may be hard to read. Select Reset to return to the default colour.
+
+Sidebar on narrow windows: choose what the sidebar does when your window is small. It can collapse to icons, hide completely, or stay open. If you hide it, select the menu button to open it again.

@@ -1,0 +1,25 @@
+Yes. The MIT license allows commercial use, including in closed-source products. You don't have to open-source your own code.
+
+**What you have to do**
+
+1. **Keep the copyright notice and the MIT license text.** The license requires that "the above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software."
+2. **Include them in what you ship.** For a distributed product (desktop app, mobile app, on-prem install, bundled JS), the notices must be somewhere users can reach them. Common places are an "Open Source Licenses" or "About" screen, a `THIRD_PARTY_NOTICES` file, or the docs.
+3. **For a hosted service or SaaS,** you aren't distributing the software. Strictly, the attribution requirement usually isn't triggered. Many companies include the notices anyway.
+
+**What you don't have to do**
+
+- Publish your source code.
+- License your product under MIT.
+- Notify or pay the author.
+- Contribute changes back. You can modify the library freely.
+
+**Caveats**
+
+- **Check transitive dependencies.** The library may pull in dependencies under other licenses (GPL, AGPL, etc.). Each has its own obligations.
+- **No warranty.** The software is provided "as is," so you have no recourse if it breaks or causes harm.
+- **Bundlers can strip license comments.** Minifiers and bundlers sometimes remove the notices, so make sure they survive in the output or are collected separately.
+- **Dual-licensed or modified "MIT" text.** Confirm the license file is the plain MIT text, not a variant with extra clauses.
+
+**Practical tip:** Use a tool to generate the notices file automatically. Examples are `license-checker` or `license-report` for npm, `cargo-about` for Rust, and `pip-licenses` for Python. It's also worth running a license scan in CI so a copyleft dependency can't slip in unnoticed.
+
+This is general information, not legal advice. If the product is commercially significant, have your legal team confirm your compliance process.

@@ -1,0 +1,17 @@
+I don't have your code here (the working directory is an empty `/tmp`), so this is the most likely cause based on the symptom, not something I've confirmed in your codebase.
+
+**Why:** A staleness window of up to 10 minutes almost always means the cache entry has a 10-minute TTL (600s) and nothing removes or updates it when the price changes. This is the cache-aside pattern with expiry as the only invalidation. The price update writes to the database, but the old value stays in Redis until the TTL runs out. The "up to" in your symptom fits this: a price changed right after a cache fill stays stale for the full 10 minutes, and one changed just before expiry is stale only briefly.
+
+**Fix, in order of preference:**
+
+1. **Invalidate on write.** After the DB update commits, delete the key (`DEL price:{sku}`). The next read repopulates it. Delete rather than set, to avoid races between concurrent writers. Do it after the commit, not before. Otherwise a reader can refill the cache with the old value in between.
+2. **Make it robust.** If the update path and cache are separate services, publish an event (or use an outbox) so invalidation is not lost when a process crashes between the DB commit and the `DEL`. Keep a shorter TTL (for example 30–60s) as a backstop.
+3. **Or write-through.** Have the update path write the new price to Redis as well as the DB. This is simpler for hot keys, but it is more prone to ordering races.
+
+**Things to check in the code:**
+- Whether the price update goes through the same code path that talks to Redis. Admin tools, batch imports, and direct SQL updates often bypass invalidation.
+- Whether the keys are the same ones the readers use. Mismatched key formats, such as a missing locale or currency suffix, make the `DEL` a silent no-op.
+- Whether there are other cache layers, such as a CDN, HTTP `Cache-Control` headers, or an in-process memory cache. These can produce the same symptom even when Redis is invalidated correctly.
+- Whether reads go to a Redis replica with lag. That is usually seconds, not minutes.
+
+If you point me at the repo, I can find the exact cache write and the price update path and make the change.

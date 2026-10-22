@@ -1,0 +1,11 @@
+**Resolved: Elevated API errors on 3 March 2026**
+
+Between 14:02 and 14:31 UTC on 3 March 2026, around 12% of API requests failed with HTTP 502 errors.
+
+**Cause:** A deploy at 14:00 UTC removed the cache warmup step. Without it, our servers could not handle normal traffic, and some requests failed.
+
+**Resolution:** We reverted the deploy at 14:27 UTC. Error rates fell back to normal by 14:31 UTC, and the service has been stable since.
+
+**Next steps:** We are changing our deploy checks so that removing the cache warmup step is flagged before release. We will also add an alert that catches this kind of error spike sooner.
+
+We apologise for the disruption. If you still see problems, please contact our support team.

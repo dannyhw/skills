@@ -1,0 +1,13 @@
+Yes, you can use an MIT licensed library in a closed-source product, including a commercial one. The MIT licence lets you use, copy, modify and sell the software without publishing your own source code.
+
+You must do one thing. Keep the library's copyright notice and the MIT licence text with your product. The licence says to include them in "all copies or substantial portions of the software". In practice, this means:
+
+1. Copy the full licence text and copyright line from the library's `LICENSE` file.
+2. Put them somewhere your users can read them, such as a "Third-party notices" or "Open source licences" screen in the app, a `NOTICES` file in the download, or a page in your documentation.
+3. Do this for every MIT library you ship, including those that other libraries pull in (transitive dependencies, which are libraries your libraries need).
+
+You do not need to publish your source code, release your product under MIT or ask the author for permission. You also do not need to tell the author that you use the library.
+
+The licence gives no warranty. The authors are not liable if the library causes problems, so you carry that risk.
+
+Two cautions. First, check the licence of each dependency, because a library marked MIT may depend on code under a different licence, such as GPL, which has stricter rules. A tool such as `license-checker` for npm or `pip-licenses` for Python can list them all. Second, this is general information and not legal advice. If the product is high value or you are unsure, ask your legal team to check.

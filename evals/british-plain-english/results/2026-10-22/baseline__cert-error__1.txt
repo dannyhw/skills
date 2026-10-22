@@ -1,0 +1,33 @@
+**What's happening:** curl couldn't build a trust chain from the server's certificate to a root CA it trusts. For an internal API, the usual causes are:
+
+1. **Private/corporate CA.** The server's cert is signed by an internal CA that isn't in curl's CA bundle. This is the most common cause.
+2. **Missing intermediate.** The server sends only its leaf cert, not the intermediate. Browsers often work around this, but curl doesn't.
+3. **TLS-inspecting proxy.** A corporate proxy re-signs traffic with its own CA.
+4. **Wrong or stale curl CA bundle.** This happens with Homebrew or a custom `CURL_CA_BUNDLE`/`SSL_CERT_FILE`.
+
+**Diagnose:**
+
+```sh
+openssl s_client -connect api.internal.example.com:443 -showcerts </dev/null
+```
+
+Look at `Verify return code` and the chain. If only one cert is sent, it's cause 2. Check the issuer name to identify the CA.
+
+**Fix (best to worst):**
+
+- **Trust the internal CA for curl.** Get the CA's root cert, in PEM format, from your IT or platform team. Then run one of these:
+  ```sh
+  curl --cacert /path/to/internal-ca.pem https://api.internal.example.com/
+  # or set it persistently
+  export CURL_CA_BUNDLE=/path/to/internal-ca.pem
+  ```
+  Note that this replaces the default bundle for that call. To keep public CAs too, concatenate your CA onto the system bundle.
+- **Trust it system-wide on macOS:**
+  ```sh
+  sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain internal-ca.pem
+  ```
+  This helps tools that use the system keychain, such as Safari and the system `/usr/bin/curl`. Homebrew curl and many other tools use their own bundle, so they still need `--cacert`.
+- **Fix the server** if the intermediate is missing. Configure it to serve the full chain (leaf plus intermediates).
+- **`curl -k`** skips verification entirely. Use it only for a quick throwaway test, never in scripts or with credentials, because it removes protection against man-in-the-middle attacks.
+
+If you paste the output of the `openssl s_client` command, with hostnames redacted if needed, I can tell you which case it is.

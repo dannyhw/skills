@@ -1,0 +1,21 @@
+**Subject: Planned database maintenance on Saturday 14 November**
+
+Hello,
+
+We will carry out planned database maintenance on Saturday 14 November 2026, from 10pm to 2am UK time.
+
+**What this means for you**
+
+- Uploads will be paused for the whole of the maintenance window.
+- Downloads will keep working as normal.
+
+If you usually upload files at this time, please plan to do so before 10pm or after 2am. Any uploads started before the window begins should finish, but we advise completing them early to be safe.
+
+This work helps keep our service fast, secure and reliable. We have chosen a quiet time to keep disruption as low as possible.
+
+We will email you once the work is complete. If you have any questions, please contact our support team.
+
+Thank you for your patience.
+
+Kind regards,
+The Support Team

@@ -1,0 +1,15 @@
+**Appearance**
+
+Make the app look and feel the way you like. Changes apply right away and are saved to your account, so they follow you to any device you sign in on.
+
+**Theme**
+Choose Light, Dark, or System. System matches your device's setting and switches automatically when your device changes between day and night modes.
+
+**Accent color**
+The accent color is used for buttons, links, selected items, and focus outlines. Pick one of the preset colors, or enter a custom hex value such as #3B82F6. If a color is hard to read against your theme, we'll show a warning. Select Reset to return to the default.
+
+**Sidebar on narrow windows**
+Choose what the sidebar does when your window is small:
+- **Collapse to icons:** Keeps navigation in view while saving space.
+- **Hide completely:** Gives content the most room. Open the sidebar with the menu button.
+- **Stay open:** Keeps the full sidebar visible, even if content gets tight.

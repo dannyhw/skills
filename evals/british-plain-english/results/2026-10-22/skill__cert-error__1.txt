@@ -1,0 +1,22 @@
+curl cannot verify the server's certificate because it does not trust the certificate authority (CA, the body that signed the certificate) that issued it. Your internal API almost certainly uses a certificate signed by a private company CA, or the server does not send its intermediate certificate, so curl cannot build a chain back to a CA it trusts.
+
+To find the cause, run this and look at the chain the server sends:
+
+```
+curl -v https://your-api.internal 2>&1 | grep -iE "issuer|subject|verify"
+openssl s_client -connect your-api.internal:443 -showcerts </dev/null
+```
+
+If the issuer is your company's CA, the fix is on your machine. Get the CA's root certificate file (a .pem or .crt file) from your platform or security team, then pass it to curl:
+
+```
+curl --cacert /path/to/company-root-ca.pem https://your-api.internal
+```
+
+To make this permanent, set `CURL_CA_BUNDLE=/path/to/company-root-ca.pem` in your shell profile. Note that this replaces curl's default list, so public sites will then fail. To avoid that, append your CA file to a copy of the default bundle and point the variable at the copy. On macOS you can instead add the CA to the System keychain and mark it as trusted, but this only helps if your curl is built to use the keychain. The curl in `/usr/bin` is, while a Homebrew curl usually is not.
+
+If `openssl s_client` shows only the server's own certificate and no intermediate, the server is misconfigured. The fix is on the server: serve the full chain (the server certificate followed by the intermediate) in its TLS configuration. For nginx, this means using the `fullchain.pem` file for `ssl_certificate`.
+
+Do not use `curl -k` or `--insecure` except for a quick test. It turns off verification, so anyone on the network can impersonate the API.
+
+If you paste the output of the first command, I can tell you which of the two cases you have.

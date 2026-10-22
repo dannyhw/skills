@@ -1,0 +1,25 @@
+OOMKilled means the container used more memory than its limit, so the Linux kernel killed it (OOM stands for out of memory). Kubernetes then restarts the container, and if this repeats, the pod shows CrashLoopBackOff (a growing delay between restarts).
+
+The limit is the `resources.limits.memory` value in the container spec. The container is killed the moment it goes over that value. The cause is one of 2 things: the limit is too low for the normal workload, or the application leaks memory (it keeps using more over time until it hits the limit).
+
+To confirm and fix it, follow these steps:
+
+1. Run `kubectl describe pod <pod-name>` and look under "Last State" for `Reason: OOMKilled` and `Exit Code: 137`. This also shows the current limit.
+2. Run `kubectl top pod <pod-name> --containers` to see real memory use. This needs metrics-server (the add-on that reports resource use). A graph in Prometheus or Grafana over several hours is better, because it shows whether use is flat or keeps climbing.
+3. If use is steady and close to the limit, raise the limit in your Deployment. Set the request to the typical use and the limit to the peak plus about 20 to 30 per cent.
+4. If use climbs without levelling off, a higher limit only delays the kill. Find the leak with a profiler or heap dump for your language.
+5. If the process has its own memory setting, keep it below the container limit. For Java, set `-XX:MaxRAMPercentage=75` or a similar `-Xmx` value. For Node.js, set `--max-old-space-size` to about 75 per cent of the limit. Otherwise the runtime may expect more memory than the container is allowed.
+
+An example of the change:
+
+```yaml
+resources:
+  requests:
+    memory: "512Mi"
+  limits:
+    memory: "1Gi"
+```
+
+Apply it with `kubectl apply -f deployment.yaml`. Then watch with `kubectl get pods -w` to check that the restarts stop.
+
+If you tell me the language of the application and the output of `kubectl describe pod`, I can give you exact values.

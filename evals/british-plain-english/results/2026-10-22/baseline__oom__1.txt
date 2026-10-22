@@ -1,0 +1,46 @@
+## What's happening
+
+`OOMKilled` (exit code 137) means a container used more memory than its **memory limit** (`resources.limits.memory`). The kernel's cgroup OOM killer sent SIGKILL, and the kubelet restarted the container. Repeated restarts end up as `CrashLoopBackOff`.
+
+Two things can cause it:
+1. **The limit is too low** for the app's normal working set.
+2. **The app leaks memory or spikes**, so any limit eventually gets hit.
+
+A third, node-level case is rarer. If the node itself runs out of memory, pods get evicted, and the status says `Evicted` instead.
+
+## Confirm it
+
+```bash
+kubectl describe pod <pod> | grep -A5 "Last State"     # Reason: OOMKilled, Exit Code: 137
+kubectl get pod <pod> -o jsonpath='{.spec.containers[*].resources}'
+kubectl top pod <pod> --containers                      # current usage (needs metrics-server)
+kubectl logs <pod> --previous                           # logs from the killed container
+```
+
+If you have Prometheus, graph `container_memory_working_set_bytes{pod="<pod>"}`. A flat line that touches the limit means the limit is too low. A steady upward slope means a leak.
+
+## What to change
+
+**1. Raise the limit, and set the request near real usage:**
+```yaml
+resources:
+  requests:
+    memory: "512Mi"   # typical steady-state usage
+  limits:
+    memory: "1Gi"     # peak usage plus 20–30% headroom
+```
+Set the request and limit close together, or equal for critical workloads. Equal values give you Guaranteed QoS, which makes the pod the last to be evicted.
+
+**2. Make the runtime respect the limit.** Runtimes often size themselves from the node's memory, not the container's:
+- **JVM:** use `-XX:MaxRAMPercentage=70` (not a fixed `-Xmx` larger than the limit). Heap is only part of the total, since metaspace, threads and native memory add to it.
+- **Node.js:** set `--max-old-space-size` to about 75% of the limit.
+- **Go:** set `GOMEMLIMIT` to about 90% of the limit.
+- **Python and others:** check for unbounded caches, large in-memory batches and too many workers.
+
+**3. Fix the root cause if usage keeps climbing.** Profile for leaks, bound caches and queues, stream large payloads instead of buffering them, and reduce worker or thread counts. Raising the limit only delays a leak.
+
+**4. Check sidecars.** The OOM may be in a sidecar such as a proxy or log shipper, not your app. `describe pod` shows which container was killed.
+
+Apply the change, then watch `kubectl get pod -w` and `kubectl top pod`. If it still dies at the new limit, it's almost certainly a leak or a runtime configuration problem, not just a small limit.
+
+If you paste the output of `kubectl describe pod` and the runtime you're using, I can point to specific values.

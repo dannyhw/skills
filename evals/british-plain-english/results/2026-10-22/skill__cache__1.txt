@@ -1,0 +1,7 @@
+The most likely cause is that your cache entries have a 10-minute TTL (time to live, the time after which Redis deletes an entry) and your price update writes only to the database. Redis keeps serving the old copy until the entry expires. I have not seen your code, so check that the TTL is set to 600 seconds and that the update path never touches Redis.
+
+The fix is to invalidate the cache whenever a price changes. After the database transaction commits, delete the Redis key for that product. The next read then misses the cache, loads the new price from the database and stores it. Deleting is safer than writing the new value into Redis, because two updates that arrive close together can write to the cache in the wrong order and leave the old price there.
+
+Delete the key only after the commit, not before. If you delete first, a reader can refill the cache with the old price before the commit lands. Even after the commit, a slow reader that loaded the old price earlier can occasionally write it back. Keep a shorter TTL, such as 30 to 60 seconds, as a backstop so any such mistake corrects itself quickly.
+
+If the keys are still stale after you add invalidation, check whether your reads come from a database replica. Replication lag (the delay before a replica receives a change) can make the cache refill with an old price just after you delete it.

@@ -1,0 +1,33 @@
+Yes. The MIT licence allows use in closed-source, commercial products. You don't have to release your own source code.
+
+**What you must do**
+
+1. **Keep the copyright notice.** Include the library's copyright line.
+2. **Keep the licence text.** Include the full MIT permission notice.
+
+The licence says these must appear in "all copies or substantial portions of the Software". In practice, this means:
+
+- **Shipped apps (mobile, desktop, firmware):** Add an "Open source licences" or "Third-party notices" screen or file. List each library with its copyright line and licence text.
+- **Web apps:** Link to a notices page. Also keep the notices in any bundled JavaScript, or in a separate file that ships with it.
+- **Server-side only:** Strictly, you may not be distributing the software, so the duty may not apply. Many teams still keep the notices in the repo or docs.
+
+**What you don't have to do**
+
+- Publish your source code.
+- Licence your own code under MIT.
+- Ask the author's permission.
+- Pay anything.
+
+**Things to be aware of**
+
+- **No warranty.** The software comes "as is". The author isn't liable for problems.
+- **Dependencies have their own licences.** The library may pull in other packages under different licences, such as GPL. Check the full dependency tree.
+- **Don't remove notices from the source files** if you copy code into your own.
+- **Check it really is MIT.** Read the `LICENSE` file, not just the `package.json` or README. Some projects are dual-licensed or have extra terms.
+
+**Practical tips**
+
+- Use a tool to generate the notices file. For JavaScript, try `license-checker` or `license-report`. For other languages, there are similar tools.
+- Add a licence check to your CI, so a non-permissive dependency doesn't slip in.
+
+I'm not a lawyer. If this is a high-stakes product, or you're going through due diligence for a sale, ask your legal team to confirm.

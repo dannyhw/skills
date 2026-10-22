@@ -1,0 +1,13 @@
+## What happens when your team cancels its subscription
+
+Your team keeps full access until the end of the current billing period. Cancelling does not end your licence straight away, and you do not get a refund for the days that remain.
+
+When you cancel, the following happens:
+
+1. Your licence stays active until the last day of the billing period. Everyone on the team can carry on working until then.
+2. Cancelled seats are removed. After the billing period ends, those users can no longer sign in to the team's workspace.
+3. We keep your data for 30 days after the billing period ends. During this time, you can export it or restart your subscription to get it back.
+
+If you do not restart your subscription within 30 days, we permanently delete your data. We cannot recover it after that.
+
+To keep a copy of your work, export your data before the billing period ends. You can do this from the account settings page.

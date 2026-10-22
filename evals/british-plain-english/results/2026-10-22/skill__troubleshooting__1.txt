@@ -1,0 +1,17 @@
+## Troubleshooting
+
+### Fix connection timeouts
+
+sqlpipe stops with `dial tcp: i/o timeout` when it cannot connect to the Postgres port (5432 by default). A firewall or security group usually blocks it.
+
+1. Check that the host that runs sqlpipe can connect to port 5432.
+2. If the database is managed, for example RDS, add the IP address of the sqlpipe host to its allowed list.
+3. Check that the host name and port in your connection string are correct.
+
+### Fix S3 permission errors
+
+sqlpipe stops with `AccessDenied` when your credentials cannot write to the bucket.
+
+1. Check which credentials sqlpipe uses. It reads the environment variables first, then the shared credentials file.
+2. Make sure the IAM policy (the set of permissions attached to your user or role) allows `s3:PutObject` and `s3:ListBucket` on the bucket.
+3. If the bucket uses encryption with a KMS key (a managed encryption key), you must also allow `kms:GenerateDataKey` on that key.
